@@ -1,114 +1,92 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>حساب المعدل الفصلي</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      direction: rtl;
-      padding: 20px;
-      background: #f9f9f9;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-bottom: 20px;
-      background: #fff;
-    }
-    th, td {
-      padding: 10px;
-      border: 1px solid #ccc;
-      text-align: center;
-    }
-    th {
-      background-color: #eee;
-    }
-    input[type="number"] {
-      width: 70px;
-      padding: 5px;
-    }
-    .results {
-      font-size: 1.2em;
-      margin-top: 20px;
-      font-weight: bold;
-    }
-    button {
-      padding: 10px 20px;
-      font-size: 1em;
-    }
-  </style>
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
+<body class="bg-gray-100 text-gray-800 p-6">
+  <div class="max-w-5xl mx-auto">
+    <h1 class="text-3xl font-bold text-center mb-8">📊 حساب المعدل الفصلي</h1>
 
-  <h2>حساب المعدل الفصلي</h2>
+    <div class="overflow-auto">
+      <table class="min-w-full bg-white shadow-md rounded-lg overflow-hidden">
+        <thead class="bg-gray-200 text-gray-700">
+          <tr>
+            <th class="p-3">المادة</th>
+            <th class="p-3">TD</th>
+            <th class="p-3">TP</th>
+            <th class="p-3">Exam</th>
+            <th class="p-3">النقطة النهائية</th>
+            <th class="p-3">الرصيد المتحصل عليه</th>
+          </tr>
+        </thead>
+        <tbody id="gradesTable" class="text-center"></tbody>
+      </table>
+    </div>
 
-  <table id="gradesTable">
-    <thead>
-      <tr>
-        <th>المادة</th>
-        <th>TD</th>
-        <th>TP</th>
-        <th>EXAM</th>
-        <th>معامل</th>
-        <th>النقطة النهائية</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
+    <div class="flex justify-center mt-6">
+      <button onclick="calculateGrades()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded">احسب</button>
+    </div>
 
-  <button onclick="calculateGrades()">احسب المعدل</button>
-
-  <div class="results" id="finalAverage"></div>
+    <div id="finalAverage" class="text-center text-xl font-semibold mt-6"></div>
+    <div id="totalCredits" class="text-center text-lg font-medium mt-2 text-green-700"></div>
+  </div>
 
   <script>
     const modules = [
-      { name: "Analyse 2", td: 0.34, tp: 0, exam: 0.66, coef: 2 },
-      { name: "Algebre 2", td: 0.33, tp: 0, exam: 0.67, coef: 2 },
-      { name: "Probability", td: 0.34, tp: 0, exam: 0.66, coef: 1 },
-      { name: "PSD", td: 0.16, tp: 0.16, exam: 0.68, coef: 3 },
-      { name: "SM", td: 0.34, tp: 0, exam: 0.66, coef: 2 },
-      { name: "TIC", td: 0, tp: 0, exam: 1.0, coef: 2 },
-      { name: "OOP", td: 0, tp: 0.4, exam: 0.6, coef: 1 },
-      { name: "Physique 2", td: 0.3, tp: 0, exam: 0.7, coef: 2 },
-      { name: "HS", td: 0, tp: 0, exam: 1.0, coef: 1 }
+      { name: "Analyse 2", td: 0.34, tp: 0, exam: 0.66, coef: 2, credit: 4 },
+      { name: "Algebre 2", td: 0.33, tp: 0, exam: 0.67, coef: 2, credit: 4 },
+      { name: "Probability", td: 0.34, tp: 0, exam: 0.66, coef: 1, credit: 3 },
+      { name: "PSD", td: 0.16, tp: 0.16, exam: 0.68, coef: 3, credit: 5 },
+      { name: "SM", td: 0.34, tp: 0, exam: 0.66, coef: 2, credit: 4 },
+      { name: "TIC", td: 0, tp: 0, exam: 1.0, coef: 2, credit: 4 },
+      { name: "OOP", td: 0, tp: 0.4, exam: 0.6, coef: 1, credit: 3 },
+      { name: "Physique 2", td: 0.3, tp: 0, exam: 0.7, coef: 2, credit: 2 },
+      { name: "HS", td: 0, tp: 0, exam: 1.0, coef: 1, credit: 1 }
     ];
 
-    const tbody = document.querySelector("#gradesTable tbody");
+    const tableBody = document.getElementById("gradesTable");
 
-    modules.forEach((mod, index) => {
+    modules.forEach((mod, i) => {
       const row = document.createElement("tr");
       row.innerHTML = `
-        <td>${mod.name}</td>
-        <td>${mod.td ? `<input type="number" min="0" max="20" id="td-${index}">` : "-"}</td>
-        <td>${mod.tp ? `<input type="number" min="0" max="20" id="tp-${index}">` : "-"}</td>
-        <td><input type="number" min="0" max="20" id="exam-${index}"></td>
-        <td>${mod.coef}</td>
-        <td id="final-${index}">-</td>
+        <td class="p-2 font-semibold">${mod.name}</td>
+        <td class="p-2">${mod.td ? `<input id="td-${i}" type="number" min="0" max="20" class="input-grade">` : '-'}</td>
+        <td class="p-2">${mod.tp ? `<input id="tp-${i}" type="number" min="0" max="20" class="input-grade">` : '-'}</td>
+        <td class="p-2"><input id="exam-${i}" type="number" min="0" max="20" class="input-grade"></td>
+        <td class="p-2 font-medium" id="final-${i}">-</td>
+        <td class="p-2 font-medium text-green-600" id="credit-${i}">-</td>
       `;
-      tbody.appendChild(row);
+      tableBody.appendChild(row);
     });
 
     function calculateGrades() {
       let totalWeighted = 0;
       let totalCoef = 0;
+      let totalCredits = 0;
 
-      modules.forEach((mod, index) => {
-        const td = mod.td ? parseFloat(document.getElementById(`td-${index}`).value) || 0 : 0;
-        const tp = mod.tp ? parseFloat(document.getElementById(`tp-${index}`).value) || 0 : 0;
-        const exam = parseFloat(document.getElementById(`exam-${index}`).value) || 0;
+      modules.forEach((mod, i) => {
+        const td = mod.td ? parseFloat(document.getElementById(`td-${i}`).value) || 0 : 0;
+        const tp = mod.tp ? parseFloat(document.getElementById(`tp-${i}`).value) || 0 : 0;
+        const exam = parseFloat(document.getElementById(`exam-${i}`).value) || 0;
 
-        const final = (td * mod.td) + (tp * mod.tp) + (exam * mod.exam);
-        document.getElementById(`final-${index}`).innerText = final.toFixed(2);
+        const final = (td * mod.td + tp * mod.tp + exam * mod.exam);
+        document.getElementById(`final-${i}`).innerText = final.toFixed(2);
+
+        const validated = final >= 10 ? mod.credit : 0;
+        document.getElementById(`credit-${i}`).innerText = `${validated} / ${mod.credit}`;
 
         totalWeighted += final * mod.coef;
         totalCoef += mod.coef;
+        totalCredits += validated;
       });
 
       const average = totalWeighted / totalCoef;
-      document.getElementById("finalAverage").innerText = `المعدل العام للفصل: ${average.toFixed(2)}`;
+      document.getElementById("finalAverage").innerText = `📘 المعدل العام: ${average.toFixed(2)} / 20`;
+      document.getElementById("totalCredits").innerText = `✅ مجموع الأرصدة المتحصل عليها: ${totalCredits} / 30`;
     }
   </script>
-
 </body>
 </html>
