@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8" />
+  <title>حساب المعدل الفصلي</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      direction: rtl;
+      padding: 20px;
+      background: #f9f9f9;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 20px;
+      background: #fff;
+    }
+    th, td {
+      padding: 10px;
+      border: 1px solid #ccc;
+      text-align: center;
+    }
+    th {
+      background-color: #eee;
+    }
+    input[type="number"] {
+      width: 70px;
+      padding: 5px;
+    }
+    .results {
+      font-size: 1.2em;
+      margin-top: 20px;
+      font-weight: bold;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 1em;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>حساب المعدل الفصلي</h2>
+
+  <table id="gradesTable">
+    <thead>
+      <tr>
+        <th>المادة</th>
+        <th>TD</th>
+        <th>TP</th>
+        <th>EXAM</th>
+        <th>معامل</th>
+        <th>النقطة النهائية</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <button onclick="calculateGrades()">احسب المعدل</button>
+
+  <div class="results" id="finalAverage"></div>
+
+  <script>
+    const modules = [
+      { name: "Analyse 2", td: 0.34, tp: 0, exam: 0.66, coef: 2 },
+      { name: "Algebre 2", td: 0.33, tp: 0, exam: 0.67, coef: 2 },
+      { name: "Probability", td: 0.34, tp: 0, exam: 0.66, coef: 1 },
+      { name: "PSD", td: 0.16, tp: 0.16, exam: 0.68, coef: 3 },
+      { name: "SM", td: 0.34, tp: 0, exam: 0.66, coef: 2 },
+      { name: "TIC", td: 0, tp: 0, exam: 1.0, coef: 2 },
+      { name: "OOP", td: 0, tp: 0.4, exam: 0.6, coef: 1 },
+      { name: "Physique 2", td: 0.3, tp: 0, exam: 0.7, coef: 2 },
+      { name: "HS", td: 0, tp: 0, exam: 1.0, coef: 1 }
+    ];
+
+    const tbody = document.querySelector("#gradesTable tbody");
+
+    modules.forEach((mod, index) => {
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td>${mod.name}</td>
+        <td>${mod.td ? `<input type="number" min="0" max="20" id="td-${index}">` : "-"}</td>
+        <td>${mod.tp ? `<input type="number" min="0" max="20" id="tp-${index}">` : "-"}</td>
+        <td><input type="number" min="0" max="20" id="exam-${index}"></td>
+        <td>${mod.coef}</td>
+        <td id="final-${index}">-</td>
+      `;
+      tbody.appendChild(row);
+    });
+
+    function calculateGrades() {
+      let totalWeighted = 0;
+      let totalCoef = 0;
+
+      modules.forEach((mod, index) => {
+        const td = mod.td ? parseFloat(document.getElementById(`td-${index}`).value) || 0 : 0;
+        const tp = mod.tp ? parseFloat(document.getElementById(`tp-${index}`).value) || 0 : 0;
+        const exam = parseFloat(document.getElementById(`exam-${index}`).value) || 0;
+
+        const final = (td * mod.td) + (tp * mod.tp) + (exam * mod.exam);
+        document.getElementById(`final-${index}`).innerText = final.toFixed(2);
+
+        totalWeighted += final * mod.coef;
+        totalCoef += mod.coef;
+      });
+
+      const average = totalWeighted / totalCoef;
+      document.getElementById("finalAverage").innerText = `المعدل العام للفصل: ${average.toFixed(2)}`;
+    }
+  </script>
+
+</body>
+</html>
